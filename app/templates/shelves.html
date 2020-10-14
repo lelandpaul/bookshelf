@@ -1,0 +1,9 @@
+{% extends 'base.html' %} {% block content %}
+
+<script>
+  window.books = {{ books | tojson | safe }};
+</script>
+
+<div id="svelte-app"></div>
+
+{% endblock %}
