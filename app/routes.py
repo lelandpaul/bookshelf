@@ -1,9 +1,16 @@
-from flask import send_from_directory, jsonify, render_template
+from flask import send_from_directory, jsonify, render_template, request
 from app import app
 from app.years import Years
 from app.models import Book, Reading
 
+# Serve Svelte apps
+@app.route("/<path:path>")
+def svelte_client(path):
+    return send_from_directory('../svelte/public/', path)
 
+
+
+# Serve the main page
 @app.route('/')
 def index():
     books = sorted([b.book_dict() for b in Book.query.all()],
@@ -12,47 +19,39 @@ def index():
                            books=books)
 
 
-@app.route("/<path:path>")
-def svelte_client(path):
-    return send_from_directory('../svelte/public/', path)
 
 
-@app.route('/test_book')
-def test_book():
-    book = {
-                'title': 'Title',
-                'authors': [{'surname': 'Surname', 'other_names': 'Other Names'},
-                            {'surname': '2', 'other_names': 'Author'}],
-                'series': 'Series',
-                'genres': ['sf', 'h'],
-                'readings': [
-                            {'year': '3G',
-                             'date': '2020-01-05',
-                             'rating': 3,
-                             'reread': False,
-                             'manner': 'aloud'
-                             },
-                            {' year': '4B',
-                             'date': '2020-05-05',
-                             'rating': 1,
-                             'reread': True,
-                             'manner': 'audio'
-                             },
-                    ]
-            }
-    return jsonify(book)
 
+categories = {
+    'year': Years.year_names(),
+    'rating': range(1, 4)[::-1],
+}
 
+sources = {
+    'reading': Reading.query,
+    'book': Book.query,
+}
+
+# Serve filtered shelves
 @app.route('/shelves')
 def get_shelves():
 
+    categorize_by = request.args.get('categorize_by')
+    cats = categories[categorize_by]
+    source = sources[request.args.get('source')]
+    sort_by = request.args.get('sort_by')
+
     shelves = [
-        {'label': year,
+        {'label': cat,
          'books':
-         [r.book.id
-          for r in sorted(
-              Reading.query.all(),
-              key=lambda x: x.date, reverse=True) if r.year == year]}
-        for year in Years.year_names()]
+            [x.book.id
+             for x in sorted(
+                    source.all(),
+                    key=lambda x: getattr(x, sort_by)
+                )
+                 if getattr(x, categorize_by) == cat]
+             }
+        for cat in cats
+    ]
 
     return jsonify(shelves)

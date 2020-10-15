@@ -1,5 +1,6 @@
 from app import db
 from app.years import Years
+from statistics import mean
 
 
 class Author(db.Model):
@@ -64,6 +65,7 @@ class Book(db.Model):
     def awards(self):
         return self.award.split(',')
 
+
     series_id = db.Column(
         'series_id_fk',
         db.Integer,
@@ -73,7 +75,34 @@ class Book(db.Model):
 
     readings = db.relationship('Reading', back_populates='book')
 
+    @property
+    def average_rating(self):
+        return mean([r.rating for r in self.readings])
+
     recommender = db.Column('recommender', db.String(128))
+
+    @property
+    def max_rating(self):
+        if len(self.readings) == 0:
+            return 1
+        return max([r.rating for r in self.readings])
+
+    @property
+    def last_read(self):
+        try:
+            return max([r.date for r in self.readings])
+        except ValueError:
+            return None
+
+    @property
+    def date(self):
+        return self.last_read
+
+    @property
+    def year(self):
+        if self.last_read is None:
+            return 'Unread'
+        return Years.get(self.last_read)
 
     def __repr__(self):
         return '<Book {}>'.format(self.title)

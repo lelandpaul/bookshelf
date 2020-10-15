@@ -27,6 +27,10 @@
             justify-content: center;
             align-items: center;
         }
+
+        .reading .fas {
+          padding-top: 3px;
+        }
     }
 
     @keyframes pulse-black {
@@ -52,7 +56,7 @@
 
 <script>
     import moment from 'moment';
-    import { library } from './stores.js';
+    import { library, filter } from './stores.js';
     export let book_id;
 
     let book = $library[book_id-1];
@@ -67,7 +71,10 @@
     </div>
 </div>
 {:then book}
-<div class="book card m-3 d-inline-block align-bottom">
+  <div class="book card m-3 align-bottom"
+       class:d-none="{!book.title.includes($filter)}"
+       class:d-inline-block="{book.title.includes($filter)}"
+    >
     <div class="card-body">
         <h5 class="card-title title">{book.title}</h5>
         {#each book.authors as author}
@@ -93,8 +100,7 @@
     </div>
     <ul class="list-group list-group-flush position-absolute w-100">
         {#each book.readings as reading}
-        <li class="reading list-group-item py-1"
-             >
+        <li class="reading list-group-item py-1">
              <span class="reading-date">
                  {reading.year}: {moment(reading.date).format('MMMM Do')}
                  {#if reading.rating === 1}
