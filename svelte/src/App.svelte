@@ -40,9 +40,7 @@
 
   /* Fill shelves */
   async function getShelves(cat,src,sort){
-    console.log(typeof cat)
     if (typeof cat === 'undefined') {
-      console.log('took the branch')
       return {label: '...', books: ''}
     }
     const promise = await fetch('./shelves?' +
