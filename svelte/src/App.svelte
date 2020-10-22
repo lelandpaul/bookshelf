@@ -32,6 +32,7 @@
 <script>
   import Shelf from './Shelf.svelte';
   import Controls from './Controls.svelte';
+  import BookDetail from './BookDetail.svelte';
   import { library } from './stores.js';
 
   /* Fill library */
@@ -61,6 +62,9 @@
 
   $: shelves = getShelves(categorize_by, source, sort_by);
 
+  let modal;
+
+
 </script>
 
 <main class="row">
@@ -77,3 +81,5 @@
       {/await}
     </div>
 </main>
+
+<BookDetail/>

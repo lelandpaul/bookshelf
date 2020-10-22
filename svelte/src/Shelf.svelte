@@ -36,7 +36,7 @@
     <div class="col"
          bind:clientHeight={h}>
         {#each books as book_id}
-            <Book {book_id}/>
+          <Book {book_id} on:message/>
         {/each}
     </div>
 </div>

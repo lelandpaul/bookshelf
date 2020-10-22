@@ -131,7 +131,11 @@ class Book(db.Model):
             'series_order': self.series_order,
             'recommender': self.recommender,
             'authors': author_dicts,
-            'readings': reading_dicts}
+            'readings': reading_dicts }
+
+        full_text = '^'.join([key + ':' + str(val) for key, val in
+                              book_dict.items()])
+        book_dict['full_text'] = full_text.lower()
 
         return book_dict
 

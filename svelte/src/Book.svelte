@@ -1,5 +1,8 @@
 <style type='text/scss'>
     @import './styles/vars.scss';
+    .clickable {
+        cursor: pointer;
+    }
 
     .book {
         width: 15rem;
@@ -55,11 +58,11 @@
 
 
 <script>
-    import moment from 'moment';
-    import { library, filter } from './stores.js';
-    export let book_id;
+  import moment from 'moment';
+  import { library, filter, detail } from './stores.js';
+  export let book_id;
 
-    let book = $library[book_id-1];
+  $: book = $library[book_id-1];
 
 </script>
 
@@ -72,20 +75,25 @@
 </div>
 {:then book}
   <div class="book card m-3 align-bottom"
-       class:d-none="{!book.title.includes($filter)}"
-       class:d-inline-block="{book.title.includes($filter)}"
+       class:d-none="{!book.full_text.includes($filter.toLowerCase())}"
+       class:d-inline-block="{book.full_text.includes($filter.toLowerCase())}"
     >
-    <div class="card-body">
-        <h5 class="card-title title">{book.title}</h5>
+    <div class="card-body"
+      >
+        <h5 class="card-title title clickable"
+            data-toggle="modal" data-target="#detail-viewer" on:click={()=>$detail=book_id-1}
+        >{book.title}</h5>
         {#each book.authors as author}
-        <h6 class="card-subtitle mb-2 text-muted">
+          <h6 class="card-subtitle mb-2 text-muted clickable"
+              on:click={()=>$filter===author.surname ? $filter='' : $filter=author.surname}>
             {author.other_names} {author.surname}
         </h6>
         {/each}
     {#if book.series}
     <div class="series text-muted justify-content-between mt-2 mb-1">
             <span class="mr-auto">Series:</span>
-            <span class="float-right">
+            <span class="float-right clickable"
+                  on:click={()=>$filter===book.series ? $filter='' : $filter=book.series}>
                 {book.series}
             </span>
     </div>
@@ -93,7 +101,9 @@
     <div class="genres row mt-3">
         {#each book.genres as genre}
         <div class="col-auto my-1">
-            <span class="badge badge-secondary">{genre}</span>
+          <span class="badge badge-secondary clickable"
+            on:click={()=>$filter===genre ? $filter='' : $filter=genre}
+          >{genre}</span>
         </div>
         {/each}
     </div>
@@ -123,4 +133,3 @@
      </ul>
 </div>
 {/await}
-

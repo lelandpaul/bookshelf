@@ -1,7 +1,7 @@
 from flask import send_from_directory, jsonify, render_template, request
 from app import app
 from app.years import Years
-from app.models import Book, Reading
+from app.models import Book, Reading, Series
 
 # Serve Svelte apps
 @app.route("/<path:path>")
@@ -55,3 +55,20 @@ def get_shelves():
     ]
 
     return jsonify(shelves)
+
+@app.route('/series')
+def get_series():
+    series_title = request.args['title']
+    series = Series.query.filter_by(name=series_title).first()
+    if series is None:
+        return jsonify([{'order': 'not found',
+                        'book': 'not found',
+                        'book_id': 'not found'}])
+    books_in_series = [ {
+        'order': book.series_order,
+        'book': book.title,
+        'book_id': book.id
+        }
+        for book in series.books
+    ]
+    return jsonify(books_in_series)
